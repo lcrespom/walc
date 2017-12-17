@@ -46,8 +46,20 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
     }
     function doRunCode() {
         let code = editor.getModel().getValue();
-        console.log('-----\nRun code:');
-        console.log(code);
+        try {
+            // tslint:disable-next-line:no-eval
+            eval(code);
+        }
+        catch (e) {
+            let match = e.stack.match(/<anonymous>:(\d+):(\d+)/);
+            if (match && match.length == 3)
+                console.warn(`Runtime error: "${e.message}" at line ${match[1]}, column ${match[2]}`);
+            // TODO: render it nicely and centered
+            /* Check the following:
+            https://microsoft.github.io/monaco-editor/playground.html#interacting-with-the-editor-revealing-a-position
+            https://microsoft.github.io/monaco-editor/playground.html#interacting-with-the-editor-rendering-glyphs-in-the-margin
+            */
+        }
     }
     function main() {
         createEditor();
