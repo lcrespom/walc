@@ -27,7 +27,8 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
                 value: '',
                 language: 'javascript',
                 lineNumbers: false,
-                renderLineHighlight: false
+                renderLineHighlight: 'none',
+                minimap: { enabled: false }
             });
             editor.focus();
             handleEditorResize(editorElem);

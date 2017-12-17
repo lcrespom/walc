@@ -17,7 +17,8 @@ function createEditor() {
 			value: '',
 			language: 'javascript',
 			lineNumbers: false,
-			renderLineHighlight: false
+			renderLineHighlight: 'none',
+			minimap: { enabled: false }
 		})
 		editor.focus()
 		handleEditorResize(editorElem)
