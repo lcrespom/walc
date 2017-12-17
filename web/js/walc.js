@@ -17,7 +17,7 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
     function loadMonaco(cb) {
-        require.config({ paths: { 'vs': 'vendor/monaco/vs' } });
+        require.config({ paths: { 'vs': '/node_modules/monaco-editor/min/vs' } });
         require(['vs/editor/editor.main'], cb);
     }
     function createEditor() {

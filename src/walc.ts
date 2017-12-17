@@ -6,7 +6,7 @@ declare let monaco: any
 let editor: any
 
 function loadMonaco(cb: () => void) {
-	require.config({ paths: { 'vs': 'vendor/monaco/vs' }})
+	require.config({ paths: { 'vs': '/node_modules/monaco-editor/min/vs' }})
 	require(['vs/editor/editor.main'], cb)
 }
 
