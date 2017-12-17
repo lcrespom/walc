@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "es2015",
+		"module": "amd",
+		"sourceMap": true,
+		"outDir": "web",
+		"noImplicitAny": true,
+		"strictNullChecks": true
+	},
+	"files": [
+		"src/walc.ts"
+	]
+}

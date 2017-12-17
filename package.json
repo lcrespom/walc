@@ -1,0 +1,30 @@
+{
+  "name": "walc",
+  "version": "1.0.0",
+  "description": "Web Audio Live Coding",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -m system --outFile web/walc.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lcrespom/walc.git"
+  },
+  "keywords": [
+    "Web",
+    "Audio",
+    "Live",
+    "Coding"
+  ],
+  "author": "Luis Crespo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lcrespom/walc/issues"
+  },
+  "homepage": "https://github.com/lcrespom/walc#readme",
+  "devDependencies": {
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
+  }
+}
