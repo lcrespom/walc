@@ -23,6 +23,7 @@ System.register("walc", ["testlib"], function (exports_2, context_2) {
         ],
         execute: function () {
             console.log('Hello from WALC:', testlib_1.add(2, 3));
+            debugger;
         }
     };
 });
