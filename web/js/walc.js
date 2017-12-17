@@ -1,28 +1,70 @@
-System.register("testlib", [], function (exports_1, context_1) {
+System.register("vanilla", [], function (exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    function add(a, b) {
-        return a + b;
+    function byId(id) {
+        return document.getElementById(id) || sinkDiv;
     }
-    exports_1("add", add);
+    exports_1("byId", byId);
+    var sinkDiv;
     return {
         setters: [],
         execute: function () {
+            sinkDiv = document.createElement('div');
         }
     };
 });
-System.register("walc", ["testlib"], function (exports_2, context_2) {
+System.register("walc", ["vanilla"], function (exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
-    var testlib_1;
+    function loadMonaco(cb) {
+        require.config({ paths: { 'vs': 'vendor/monaco/vs' } });
+        require(['vs/editor/editor.main'], cb);
+    }
+    function createEditor() {
+        loadMonaco(function () {
+            let editorElem = vanilla_1.byId('walc-code-editor');
+            editor = monaco.editor.create(editorElem, {
+                value: '',
+                language: 'javascript',
+                lineNumbers: false,
+                renderLineHighlight: false
+            });
+            editor.focus();
+            handleEditorResize(editorElem);
+        });
+    }
+    function handleEditorResize(elem) {
+        let edh = elem.clientHeight;
+        setInterval(_ => {
+            let newH = elem.clientHeight;
+            if (edh != newH) {
+                edh = newH;
+                editor.layout();
+            }
+        }, 1000);
+    }
+    function doRunCode() {
+        let code = editor.getModel().getValue();
+        console.log('-----\nRun code:');
+        console.log(code);
+    }
+    function main() {
+        createEditor();
+        let editorElem = vanilla_1.byId('walc-code-editor');
+        editorElem.addEventListener('keydown', e => {
+            if (e.altKey && e.key == 'Enter')
+                doRunCode();
+        });
+    }
+    var vanilla_1, editor;
     return {
         setters: [
-            function (testlib_1_1) {
-                testlib_1 = testlib_1_1;
+            function (vanilla_1_1) {
+                vanilla_1 = vanilla_1_1;
             }
         ],
         execute: function () {
-            console.log('Hello from WALC:', testlib_1.add(2, 3));
+            main();
         }
     };
 });
