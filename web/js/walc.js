@@ -13,7 +13,7 @@ System.register("vanilla", [], function (exports_1, context_1) {
         }
     };
 });
-System.register("walc", ["vanilla"], function (exports_2, context_2) {
+System.register("editor", ["vanilla"], function (exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
     function loadMonaco(cb) {
@@ -22,6 +22,7 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
     }
     function createEditor() {
         loadMonaco(function () {
+            registerHoverHandler();
             let editorElem = vanilla_1.byId('walc-code-editor');
             editor = monaco.editor.create(editorElem, {
                 value: '',
@@ -35,6 +36,7 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
             editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, doRunCode);
         });
     }
+    exports_2("createEditor", createEditor);
     function handleEditorResize(elem) {
         let edh = elem.clientHeight;
         let edw = elem.clientWidth;
@@ -48,20 +50,28 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
             }
         }, 1000);
     }
-    function showError(msg, line, col) {
-        console.warn(`Runtime error: "${msg}" at line ${line}, column ${col}`);
-        editor.revealLineInCenter(line);
-        decorations = editor.deltaDecorations(decorations, [{
-                range: new monaco.Range(line, 1, line, 1),
-                options: {
-                    isWholeLine: true,
-                    className: 'walc-error-line'
-                }
-            }]);
+    // -------------------- Error handling --------------------
+    function registerHoverHandler() {
+        monaco.languages.registerHoverProvider('javascript', {
+            provideHover: function (model, position) {
+                // TODO: make it dynamic
+                // 		call editor.getLineDecorations to get current error position
+                if (!currentError ||
+                    position.lineNumber != currentError.line ||
+                    position.column > currentError.column)
+                    return;
+                return {
+                    contents: [
+                        '**Runtime Error**',
+                        currentError.message
+                    ]
+                };
+            }
+        });
     }
     function getErrorLocation(e) {
         // Safari
-        if (e.line || e.column)
+        if (e.line)
             return { line: e.line, column: e.column };
         // Chrome: <anonymous>
         // Firefox: > eval
@@ -74,23 +84,37 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
         }
         return null;
     }
+    function showError(msg, line, col) {
+        console.log(`Runtime error: "${msg}" at line ${line}, column ${col}`);
+        editor.revealLineInCenter(line);
+        decorations = editor.deltaDecorations(decorations, [{
+                range: new monaco.Range(line, 1, line, col),
+                options: {
+                    isWholeLine: false,
+                    className: 'walc-error-line'
+                }
+            }]);
+    }
+    // -------------------- Code execution --------------------
     function doRunCode() {
         let code = editor.getModel().getValue();
         try {
+            currentError = null;
+            decorations = editor.deltaDecorations(decorations, []);
             // tslint:disable-next-line:no-eval
             eval(code);
-            decorations = editor.deltaDecorations(decorations, []);
         }
         catch (e) {
             let location = getErrorLocation(e);
-            if (location)
+            if (location) {
+                currentError = e;
+                currentError.line = location.line;
+                currentError.column = location.column;
                 showError(e.message, location.line, location.column);
+            }
         }
     }
-    function main() {
-        createEditor();
-    }
-    var vanilla_1, editor, decorations;
+    var vanilla_1, editor, decorations, currentError;
     return {
         setters: [
             function (vanilla_1_1) {
@@ -99,6 +123,23 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
         ],
         execute: function () {
             decorations = [];
+        }
+    };
+});
+System.register("walc", ["editor"], function (exports_3, context_3) {
+    "use strict";
+    var __moduleName = context_3 && context_3.id;
+    function main() {
+        editor_1.createEditor();
+    }
+    var editor_1;
+    return {
+        setters: [
+            function (editor_1_1) {
+                editor_1 = editor_1_1;
+            }
+        ],
+        execute: function () {
             main();
         }
     };

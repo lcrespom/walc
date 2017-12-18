@@ -7,7 +7,7 @@ Live coding with web audio
 		Use https://github.com/rich-harris/eval2 only if really necessary.
 	- [ ] When running, provide warning if syntax error
 	- [x] Capture runtime errors and highlight line number.
-	- [ ] Display error message on line hover (see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-hover-provider-example)
+	- [x] Display error message on line hover
 - [ ] Multiple editors / buffers
 - [ ] Synth API
 - [ ] Quick fix errors
