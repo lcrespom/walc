@@ -33,10 +33,20 @@ System.register("editor", ["vanilla"], function (exports_2, context_2) {
             });
             editor.focus();
             handleEditorResize(editorElem);
-            editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, doRunCode);
+            registerActions();
         });
     }
     exports_2("createEditor", createEditor);
+    function registerActions() {
+        editor.addAction({
+            id: 'walc-run',
+            label: 'Run code',
+            keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.Enter],
+            contextMenuGroupId: 'navigation',
+            contextMenuOrder: 1,
+            run: doRunCode
+        });
+    }
     function handleEditorResize(elem) {
         let edh = elem.clientHeight;
         let edw = elem.clientWidth;
