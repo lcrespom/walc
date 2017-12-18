@@ -23,6 +23,10 @@ function createEditor() {
 		})
 		editor.focus()
 		handleEditorResize(editorElem)
+		editor.addCommand(
+			monaco.KeyMod.Alt | monaco.KeyCode.Enter,
+			doRunCode
+		)
 	})
 }
 
@@ -52,6 +56,22 @@ function showError(msg: string, line: number, col: number) {
 	}])
 }
 
+function getErrorLocation(e: any) {
+	// Safari
+	if (e.line || e.column)
+		return { line: e.line, column: e.column }
+	// Chrome: <anonymous>
+	// Firefox: > eval
+	let match = e.stack.match(/(<anonymous>|> eval):(\d+):(\d+)/)
+	if (match && match.length == 4) {
+		return {
+			line: parseInt(match[2], 10),
+			column: parseInt(match[3], 10)
+		}
+	}
+	return null
+}
+
 function doRunCode() {
 	let code = editor.getModel().getValue()
 	try {
@@ -59,19 +79,14 @@ function doRunCode() {
 		eval(code)
 		decorations = editor.deltaDecorations(decorations, [])
 	} catch (e) {
-		let match = e.stack.match(/<anonymous>:(\d+):(\d+)/)
-		if (match && match.length == 3)
-			showError(e.message, parseInt(match[1], 10), parseInt(match[2], 10))
+		let location = getErrorLocation(e)
+		if (location)
+			showError(e.message, location.line, location.column)
 	}
 }
 
 function main() {
 	createEditor()
-	let editorElem = byId('walc-code-editor')
-	editorElem.addEventListener('keydown', e => {
-		if (e.altKey && e.key == 'Enter')
-			doRunCode()
-	})
 }
 
 

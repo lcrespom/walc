@@ -32,6 +32,7 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
             });
             editor.focus();
             handleEditorResize(editorElem);
+            editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, doRunCode);
         });
     }
     function handleEditorResize(elem) {
@@ -58,6 +59,21 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
                 }
             }]);
     }
+    function getErrorLocation(e) {
+        // Safari
+        if (e.line || e.column)
+            return { line: e.line, column: e.column };
+        // Chrome: <anonymous>
+        // Firefox: > eval
+        let match = e.stack.match(/(<anonymous>|> eval):(\d+):(\d+)/);
+        if (match && match.length == 4) {
+            return {
+                line: parseInt(match[2], 10),
+                column: parseInt(match[3], 10)
+            };
+        }
+        return null;
+    }
     function doRunCode() {
         let code = editor.getModel().getValue();
         try {
@@ -66,18 +82,13 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
             decorations = editor.deltaDecorations(decorations, []);
         }
         catch (e) {
-            let match = e.stack.match(/<anonymous>:(\d+):(\d+)/);
-            if (match && match.length == 3)
-                showError(e.message, parseInt(match[1], 10), parseInt(match[2], 10));
+            let location = getErrorLocation(e);
+            if (location)
+                showError(e.message, location.line, location.column);
         }
     }
     function main() {
         createEditor();
-        let editorElem = vanilla_1.byId('walc-code-editor');
-        editorElem.addEventListener('keydown', e => {
-            if (e.altKey && e.key == 'Enter')
-                doRunCode();
-        });
     }
     var vanilla_1, editor, decorations;
     return {
