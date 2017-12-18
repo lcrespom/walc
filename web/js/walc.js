@@ -36,29 +36,39 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
     }
     function handleEditorResize(elem) {
         let edh = elem.clientHeight;
+        let edw = elem.clientWidth;
         setInterval(_ => {
             let newH = elem.clientHeight;
-            if (edh != newH) {
+            let newW = elem.clientWidth;
+            if (edh != newH || edw != newW) {
                 edh = newH;
+                edw = newW;
                 editor.layout();
             }
         }, 1000);
+    }
+    function showError(msg, line, col) {
+        console.warn(`Runtime error: "${msg}" at line ${line}, column ${col}`);
+        editor.revealLineInCenter(line);
+        decorations = editor.deltaDecorations(decorations, [{
+                range: new monaco.Range(line, 1, line, 1),
+                options: {
+                    isWholeLine: true,
+                    className: 'walc-error-line'
+                }
+            }]);
     }
     function doRunCode() {
         let code = editor.getModel().getValue();
         try {
             // tslint:disable-next-line:no-eval
             eval(code);
+            decorations = editor.deltaDecorations(decorations, []);
         }
         catch (e) {
             let match = e.stack.match(/<anonymous>:(\d+):(\d+)/);
             if (match && match.length == 3)
-                console.warn(`Runtime error: "${e.message}" at line ${match[1]}, column ${match[2]}`);
-            // TODO: render it nicely and centered
-            /* Check the following:
-            https://microsoft.github.io/monaco-editor/playground.html#interacting-with-the-editor-revealing-a-position
-            https://microsoft.github.io/monaco-editor/playground.html#interacting-with-the-editor-rendering-glyphs-in-the-margin
-            */
+                showError(e.message, parseInt(match[1], 10), parseInt(match[2], 10));
         }
     }
     function main() {
@@ -69,7 +79,7 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
                 doRunCode();
         });
     }
-    var vanilla_1, editor;
+    var vanilla_1, editor, decorations;
     return {
         setters: [
             function (vanilla_1_1) {
@@ -77,6 +87,7 @@ System.register("walc", ["vanilla"], function (exports_2, context_2) {
             }
         ],
         execute: function () {
+            decorations = [];
             main();
         }
     };
